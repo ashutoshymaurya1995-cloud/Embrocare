@@ -1,0 +1,41 @@
+name: Build EmbroCare APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.6'
+          channel: stable
+          cache: true
+
+      - name: Create Android project
+        run: flutter create --platforms=android --project-name embrocare .
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: embrocare-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
